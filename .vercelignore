@@ -1,0 +1,15 @@
+node_modules
+.next
+.env
+.env*.local
+data
+assets
+research
+docs
+.claude
+.playwright-mcp
+.remember
+cloudflared.exe
+*.log
+tintin-dataset.json
+tsconfig.tsbuildinfo

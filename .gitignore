@@ -1,0 +1,47 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# next.js
+/.next/
+/out/
+next-env.d.ts
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+.playwright-mcp/
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# env
+.env*.local
+.env
+
+# reservation log (local)
+/data
+
+# typescript
+*.tsbuildinfo
+
+.vercel
+.env*
+
+# local logs & tooling
+*.log
+cloudflared.exe
+.claude/
+.remember/
+
+# raw source material (not needed to build)
+/assets
+/research
+/docs
+tintin-dataset.json

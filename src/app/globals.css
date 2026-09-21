@@ -1,0 +1,283 @@
+@import "tailwindcss";
+
+/* ───────────────────────── Design tokens ───────────────────────── */
+/* DAYLIGHT theme. Token names are historical (built dark-first): `noir` is now
+   the LIGHT base tone, `bone` the DARK foreground. Roles, not literal colors —
+   bg-noir = page surface, text-bone = primary text. Drawn from the venue's own
+   daytime photos: sunlit oat walls, rattan stone, olive plants, brass lamps. */
+@theme {
+  --color-noir: #f4ede1;        /* oat — page surface / light-on-accent */
+  --color-ink: #eae0cf;         /* linen — raised surfaces */
+  --color-ink-2: #e1d5c0;       /* deeper linen */
+  --color-bone: #2a211b;        /* espresso — primary text / dark scrims */
+  --color-bone-dim: #6b5d4f;    /* cocoa — muted text */
+  --color-muted: #8a7c6a;
+  --color-brass: #9a7022;       /* deepened for AA contrast on light */
+  --color-brass-bright: #b5862e;
+  --color-olive: #6e7458;       /* secondary accent — banquettes / plants */
+  --color-ember: #9b4a3f;
+
+  --font-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* ───────────────────────── Base ───────────────────────── */
+:root {
+  color-scheme: light;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--color-noir);
+}
+
+body {
+  background: var(--color-noir);
+  color: var(--color-bone);
+  font-family: var(--font-sans);
+  font-feature-settings: "kern", "liga", "calt";
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-brass);
+  color: var(--color-noir);
+}
+
+/* Focus visibility — keyboard a11y */
+:focus-visible {
+  outline: 2px solid var(--color-brass-bright);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ───────────────────────── Typography helpers ───────────────────────── */
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 300;
+  letter-spacing: -0.01em;
+}
+
+/* Small heading for label-style blocks (Address, Hours, Contact) */
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-muted);
+}
+
+.lede {
+  font-family: var(--font-display);
+  font-weight: 300;
+  color: var(--color-bone-dim);
+}
+
+/* Fluid display scale */
+.h-hero {
+  font-size: clamp(3.25rem, 13vw, 12rem);
+  line-height: 0.92;
+  font-weight: 300;
+}
+.h-section {
+  font-size: clamp(2.2rem, 6vw, 4.75rem);
+  line-height: 1.02;
+  font-weight: 300;
+}
+/* ───────────────────────── Decorative ───────────────────────── */
+/* Vignette */
+.vignette::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    120% 90% at 50% 30%,
+    transparent 40%,
+    color-mix(in srgb, var(--color-noir) 85%, transparent) 100%
+  );
+}
+
+/* Idle float for the ambient menu backdrop cards (paired with scroll parallax) */
+@keyframes menu-card-float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -16px, 0); }
+}
+.menu-card-float {
+  animation-name: menu-card-float;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
+.link-underline {
+  position: relative;
+}
+.link-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 1px;
+  width: 100%;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.5s var(--ease-out-soft);
+}
+.link-underline:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ───────────────────────── Marquee carousel ───────────────────────── */
+.marquee {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  /* Fade the strip into the background at both edges */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+
+.marquee__track {
+  display: flex;
+  width: max-content;
+  gap: 1rem;
+  padding-block: 0.25rem;
+  animation: marquee-scroll var(--marquee-duration, 60s) linear infinite;
+  will-change: transform;
+}
+
+.marquee[data-direction="right"] .marquee__track {
+  animation-direction: reverse;
+}
+
+.marquee:hover .marquee__track {
+  animation-play-state: paused;
+}
+
+.marquee__item {
+  position: relative;
+  flex: 0 0 auto;
+  /* Width scales with the viewport so the number of visible cards stays roughly
+     constant (~5) at any screen size. The smallest set has 9 distinct images;
+     keeping visible cards well under 9 guarantees the two copies of an image
+     (half a track apart) never appear on screen at the same time — even on
+     wide displays up to ~2560px. */
+  width: clamp(10.5rem, 21vw, 28rem);
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 3px;
+  border: 1px solid color-mix(in srgb, var(--color-bone) 10%, transparent);
+}
+
+.marquee__item img {
+  transition: transform 0.7s var(--ease-out-soft);
+}
+.marquee__item:hover img {
+  transform: scale(1.05);
+}
+
+@keyframes marquee-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    /* Half the track = exactly one image-set (gap is uniform) → seamless loop */
+    transform: translate3d(calc(-50% - 0.5rem), 0, 0);
+  }
+}
+
+/* ───────────────────────── Route curtain ───────────────────────── */
+/* Bottom-to-top sweep: rise from below to cover, hold the crest, keep rising off
+   the top to reveal. Per-segment easing set inside the keyframes so it reads as
+   one fluid gesture. CSS (not JS) so the 0% rise-to-cover frame always renders. */
+@keyframes curtain-sweep {
+  0% {
+    transform: translateY(100%);
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); /* easeOutExpo — silky glide up */
+  }
+  33% {
+    transform: translateY(0%);
+    animation-timing-function: linear; /* hold the crest */
+  }
+  48% {
+    transform: translateY(0%);
+    animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1); /* gentle ease-in-out off the top */
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+@keyframes curtain-crest {
+  0% { opacity: 0; transform: scale(0.9); }
+  30% { opacity: 1; transform: scale(1); }
+  46% { opacity: 1; transform: scale(1); }
+  62% { opacity: 0; transform: scale(1.04); }
+  100% { opacity: 0; transform: scale(1.04); }
+}
+.curtain {
+  animation: curtain-sweep 2s both;
+  will-change: transform;
+}
+.curtain__crest {
+  animation: curtain-crest 2s ease-in-out both;
+  will-change: transform, opacity;
+}
+@media (prefers-reduced-motion: reduce) {
+  /* No sweep — a brief, movement-free veil instead. */
+  .curtain {
+    animation: none;
+    transform: translateY(-100%);
+  }
+  .curtain__crest { animation: none; opacity: 0; }
+}
+
+/* ───────────────────────── Smooth scroll (Lenis) ───────────────────────── */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* ───────────────────────── Reduced motion ───────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
